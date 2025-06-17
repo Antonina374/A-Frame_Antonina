@@ -1,18 +1,134 @@
-<html>
-	<head>
-		<title>Антоніна Барсукова</title>
-	</head>
-	<body> 
-    		<p><a href="hw1/hw1.html" target="_blank">Homework 1</a>
-		<p><a href="hw2/hw2.html" target="_blank">Homework 2</a>
-		<p><a href="hw3/hw3.html" target="_blank">Homework 3</a>
-		<p><a href="hw4/hw4.html" target="_blank">Homework 4</a>
-		<p><a href="hw5/ARSolarSystem.html" target="_blank">Homework 5_AR</a>
-		<p><a href="hw5/VRSolarSystem.html" target="_blank">Homework 5_VR</a>
-		<p><a href="hw6/hw6.html" target="_blank">Homework 6</a>
-		<p><a href="lab1/lab1.html" target="_blank">Лабораторна робота 1</a>	
-		<p><a href="lab2/lab2.html" target="_blank">Лабораторна робота 2</a>
-		<p><a href="hw9/hw9.html" target="_blank">Homework 9</a>
-		<p><a href="hw11/hw11.html" target="_blank">Homework 11</a>
-  	</body>
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Многогранники в VR</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script>
+      AFRAME.registerComponent("click-toggle-rotate", {
+        init: function () {
+          this.isPaused = false;
+          this.el.addEventListener("click", () => {
+            this.isPaused = !this.isPaused;
+          });
+        },
+        tick: function (_, delta) {
+          if (!this.isPaused) {
+            this.el.object3D.rotation.y += delta / 1000;
+          }
+        },
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const data = {
+          "Тетраедр": {
+            geometry: "tetrahedron",
+            formula: "Area: \\sqrt{3}a^2\\quad Volume: \\frac{a^3}{6\\sqrt{2}}",
+            color: "#FF6F61",
+          },
+          "Куб": {
+            geometry: "box",
+            formula: "Area: 6a^2\\quad Volume: a^3",
+            color: "#6A5ACD",
+          },
+          "Октаедр": {
+            geometry: "octahedron",
+            formula: "Area: 2\\sqrt{3}a^2\\quad Volume: \\frac{\\sqrt{2}a^3}{3}",
+            color: "#20B2AA",
+          },
+          "Додекаедр": {
+            geometry: "dodecahedron",
+            formula: "Area: 3\\sqrt{25+10\\sqrt{5}}a^2\\quad Volume: \\frac{(15+7\\sqrt{5})a^3}{4}",
+            color: "#FFA500",
+          },
+          "Ікосаедр": {
+            geometry: "icosahedron",
+            formula: "Area: 5\\sqrt{3}a^2\\quad Volume: \\frac{5(3+\\sqrt{5})a^3}{12}",
+            color: "#2E8B57",
+          },
+        };
+
+        const selector = document.getElementById("poly-select");
+        const model = document.getElementById("poly-model");
+        const infoImage = document.getElementById("info-image");
+
+        function updateModel(name) {
+          const entry = data[name];
+          model.setAttribute("geometry", `primitive: ${entry.geometry}; radius: 1`);
+          model.setAttribute("material", `color: ${entry.color}`);
+          const encodedFormula = encodeURIComponent(`\\dpi{150} ${entry.formula}`);
+          const latexURL = `https://latex.codecogs.com/png.image?${encodedFormula}`;
+          infoImage.setAttribute("src", latexURL);
+        }
+
+        selector.addEventListener("change", (e) => {
+          updateModel(e.target.value);
+        });
+
+        updateModel(selector.value);
+      });
+    </script>
+    <style>
+      #ui {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(255, 255, 255, 0.85);
+        padding: 10px;
+        border-radius: 8px;
+        z-index: 1;
+      }
+
+      select {
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="ui">
+      <label for="poly-select">Оберіть многогранник:</label>
+      <select id="poly-select">
+        <option>Тетраедр</option>
+        <option>Куб</option>
+        <option>Октаедр</option>
+        <option>Додекаедр</option>
+        <option>Ікосаедр</option>
+      </select>
+    </div>
+
+    <a-scene background="color: #DFF6FF" shadow="type: pcfsoft">
+      <!-- Камера -->
+      <a-entity camera position="0 1.6 0">
+        <a-cursor></a-cursor>
+      </a-entity>
+
+      <!-- Освітлення з тінями -->
+      <a-entity light="type: ambient; intensity: 0.5"></a-entity>
+      <a-entity light="type: directional; intensity: 0.8; castShadow: true"
+                position="2 4 2"></a-entity>
+
+      <!-- Підлога для тіні -->
+      <a-plane rotation="-90 0 0" width="10" height="10" color="#EEE" shadow="receive: true"></a-plane>
+
+      <!-- 3D-модель -->
+      <a-entity id="poly-model"
+                position="0 1.6 -3.2"
+                material="color: #4CC3D9"
+                click-toggle-rotate
+                shadow="cast: true">
+      </a-entity>
+
+      <!-- Інформаційна панель -->
+      <a-entity position="0 0.5 -2">
+        <a-plane width="2.5" height="1" color="#fff" opacity="0.9"></a-plane>
+        <a-image id="info-image"
+                 position="0 0 0.01"
+                 width="2.3"
+                 height="0.5"
+                 src="">
+        </a-image>
+      </a-entity>
+    </a-scene>
+  </body>
 </html>
